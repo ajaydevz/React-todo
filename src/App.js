@@ -1,12 +1,14 @@
-import React from "react";
-import Todo from "./components/Todo";
+import './App.css'
+import Todo from './components/Todo';
 
-
-
-function App() {
-  return (
-    <div>
-      <Todo />
+const App =()=> {
+   return (
+    <div className="container">
+      <div className="app-wrapper">
+        <div>
+          <Todo />
+        </div>
+      </div>
     </div>
   );
 }

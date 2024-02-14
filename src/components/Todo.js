@@ -1,59 +1,86 @@
-import React from 'react';
-import './Todo.css';
-import { useState } from 'react';
+import React, { useState,useRef,useEffect } from 'react'
+import { IoMdDoneAll} from "react-icons/io";
+import { FiEdit } from "react-icons/fi";
+import { MdDelete } from "react-icons/md";
 
 function Todo() {
-  const [todo ,setTodo] = useState('')
-  const [todos,setTodos] = useState([])
+
+  const [todo,setTodo] = useState('');
+  const [todos,setTodos] = useState([]);
+  const [editId,setEditId] = useState(0)
 
   const addTodo=()=>{
-    setTodos([...todos,{id:Date.now(),text:todo,status:false}])
-    console.log(todos,todo)
+    if(todo !== ''){
+        setTodos([...todos,{list:todo, id: Date.now(), status:false}])
+        console.log(todos,todo)
+        setTodo('')
+    }
+    if(editId) {
+        const editTodo = todos.find((todo) => todo.id === editId)
+        const updateTodo = todos.map((to) => to.id === editTodo.id
+        ? (to = {id: to.id, list : todo})
+        : (to = {id: to.id, list : to.list}))
+        setTodos (updateTodo)
+        setEditId(0);
+        setTodo('')
+        }
   }
 
+  const onDelete=(id)=>{
+    setTodos(todos.filter((to) => to.id !== id))
+  }
+
+  const onComplete=(id)=>{
+    let complete = todos.map((to)=>{
+        if (to.id === id){
+            return ({...to , status:!to.status })
+        }
+        return to
+    })
+    setTodos(complete)
+  }
+  
+  const onEdit = (id) =>{
+    const editTodo = todos.find((to)=> to.id == id)
+    setTodo(editTodo.list)
+    setEditId(editTodo.id)
+
+  }
+
+
+  const handleSubmit=(event)=>{
+    event.preventDefault();
+  }
+
+  const inputRef = useRef('null');
+
+  useEffect(()=>{
+    inputRef.current.focus();
+  })
 
 
 
   return (
-    <div className="app">
-      <div className="mainHeading">
-        <h1>ToDo List!</h1>
-      </div>
-      <div className="subHeading">
-        <br />
-        <h2>Whoop, it's Wednesday 🌝 ☕ </h2>
-      </div>
-      <div className="input">
-        <input type="text" value={todo} placeholder="🖊️ Add item..." onChange={(event)=>setTodo(event.target.value)} />
-        <i className="fas fa-plus" onClick={addTodo}></i>
-      </div>
-
-      <div className="todos">
-      { todos.map((obj)=>{
-
-      return(<div className="todo">
-      <div className="left">
-        <input onChange={(e)=>{
-          console.log(e.target.checked)
-          console.log(obj)
-          setTodos(todos.filter(obj2=>{
-            if (obj2.id === obj.id){
-              obj2.status=e.target.checked
+    <div> 
+      <h1>Todo App</h1>
+      <form onSubmit={handleSubmit}>
+        <input className='task-input' ref={inputRef} type='text' value={todo}  placeholder='enter your todo' onChange={(event)=>setTodo(event.target.value)} />
+        <button className='button-add' onClick={addTodo}>{ editId ? 'EDIT' : 'ADD' }</button>
+      </form>
+      <div className='list'>
+        <ul>
+            {
+                todos.map((to)=>(<li className='list-items'><div className='list-item-list' id={to.status ? 'list-item' : 'null' }>{to.list}</div> 
+                            <span> 
+                                <IoMdDoneAll className='list-item-icons' id='complete' onClick={()=>onComplete(to.id)}/>
+                                <FiEdit  className='list-item-icons' id='edit' onClick={()=>onEdit(to.id)}/> 
+                                <MdDelete  className='list-item-icons' id='delete' onClick={()=>onDelete(to.id)}/> 
+                            </span></li>))
             }
-            return obj2
-          }))
-        }}  value={obj.status} type="checkbox" name="" id="" />
-        <p>{obj.text}</p>
-      </div>
-      <div className="right">
-        <i className="fas fa-times"></i>
-      </div>
-      </div>)})}
-
+        </ul>
       </div>
     </div>
   )
 }
-
 
 export default Todo
